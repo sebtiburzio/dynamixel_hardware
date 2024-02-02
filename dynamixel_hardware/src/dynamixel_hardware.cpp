@@ -174,7 +174,6 @@ CallbackReturn DynamixelHardware::on_init(const hardware_interface::HardwareInfo
     return CallbackReturn::ERROR;
   }
 
-  // NEW - add SyncWriteHandler for current
   if (!dynamixel_workbench_.addSyncWriteHandler(
         control_items_[kGoalCurrentItem]->address, control_items_[kGoalCurrentItem]->data_length,
         &log)) {
@@ -220,7 +219,6 @@ std::vector<hardware_interface::CommandInterface> DynamixelHardware::export_comm
       info_.joints[i].name, hardware_interface::HW_IF_POSITION, &joints_[i].command.position));
     command_interfaces.emplace_back(hardware_interface::CommandInterface(
       info_.joints[i].name, hardware_interface::HW_IF_VELOCITY, &joints_[i].command.velocity));
-    // TODO - mixing effort and current naming?
     command_interfaces.emplace_back(hardware_interface::CommandInterface(
       info_.joints[i].name, hardware_interface::HW_IF_EFFORT, &joints_[i].command.effort));
   }
@@ -322,7 +320,7 @@ return_type DynamixelHardware::write(const rclcpp::Time & /* time */, const rclc
     return return_type::OK;
   }
   
-  // Position control
+  // Extended Position control
   if (std::any_of(
         joints_.cbegin(), joints_.cend(), [](auto j) { return j.command.position != j.prev_command.position; })) {
     set_control_mode(ControlMode::ExtendedPosition);
@@ -530,7 +528,6 @@ CallbackReturn DynamixelHardware::set_joint_velocities()
   return CallbackReturn::SUCCESS;
 }
 
-// TODO - mixing effort and current naming?
 CallbackReturn DynamixelHardware::set_joint_currents()
 {
   const char * log = nullptr;
